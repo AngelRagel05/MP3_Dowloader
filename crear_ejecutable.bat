@@ -12,7 +12,7 @@ echo Creando ejecutable...
 echo Esto puede tomar unos minutos...
 echo.
 
-pyinstaller --onefile --windowed --name "YouTube MP3 Downloader" --icon=NONE downloader.py
+pyinstaller --onefile --windowed --name "YouTube MP3 Downloader" --icon="LogoDownloader.ico" --add-data "LogoDownloader.png;." downloader.py
 
 echo.
 echo ================================================

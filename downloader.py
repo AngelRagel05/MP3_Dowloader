@@ -1,4 +1,5 @@
 import tkinter as tk
+import sys
 from tkinter import messagebox, scrolledtext
 import yt_dlp
 import imageio_ffmpeg as ffmpeg
@@ -12,6 +13,21 @@ class YouTubeDownloader:
     def __init__(self, root):
         self.root = root
         self.root.title("YouTube MP3 Downloader - Cola de Descargas")
+        
+        # Configurar icono
+        try:
+            # Función para encontrar recursos (funciona en dev y PyInstaller)
+            if hasattr(sys, '_MEIPASS'):
+                base_path = sys._MEIPASS
+            else:
+                base_path = os.path.abspath(".")
+                
+            icon_path = os.path.join(base_path, "LogoDownloader.png")
+            if os.path.exists(icon_path):
+                icon = tk.PhotoImage(file=icon_path)
+                self.root.iconphoto(False, icon)
+        except Exception as e:
+            print(f"Error al cargar icono: {e}")
         self.root.geometry("700x600")
         self.root.resizable(False, False)
         

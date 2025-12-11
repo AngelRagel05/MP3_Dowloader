@@ -14,12 +14,18 @@ $Shortcut.WindowStyle = 0  # Ventana minimizada (oculta la consola)
 $Shortcut.Description = "YouTube MP3 Downloader con Cola de Descargas"
 
 # Usar icono de Python si está disponible, sino usar icono predeterminado
-$PythonPath = (Get-Command python -ErrorAction SilentlyContinue).Source
-if ($PythonPath) {
-    $Shortcut.IconLocation = "$PythonPath,0"
+# Usar el logo de la aplicación si existe
+$IconPath = "$PSScriptRoot\LogoDownloader.ico"
+if (Test-Path $IconPath) {
+    $Shortcut.IconLocation = $IconPath
 } else {
-    # Usar icono de carpeta de música como alternativa
-    $Shortcut.IconLocation = "%SystemRoot%\System32\SHELL32.dll,108"
+    # Fallback al icono de Python o sistema
+    $PythonPath = (Get-Command python -ErrorAction SilentlyContinue).Source
+    if ($PythonPath) {
+        $Shortcut.IconLocation = "$PythonPath,0"
+    } else {
+        $Shortcut.IconLocation = "%SystemRoot%\System32\SHELL32.dll,108"
+    }
 }
 
 # Guardar el acceso directo
