@@ -5,9 +5,11 @@ Aplicación de escritorio con sistema de cola para descargar múltiples audios d
 ## Características
 
 ✅ **Sistema de cola de descargas** - Añade múltiples URLs y se descargarán automáticamente  
+✅ **Historial de archivos descargados** - Ve todos los archivos que has descargado con fecha y hora  
+✅ **Acceso rápido a carpeta** - Botón para abrir directamente la carpeta de descargas  
+✅ **Máxima calidad de audio** - Descarga en MP3 a 320 kbps y 44100 Hz (calidad CD)  
 ✅ Interfaz intuitiva y moderna  
 ✅ Descarga directa a tu carpeta de música personalizada  
-✅ Conversión automática a MP3 (192 kbps)  
 ✅ No requiere instalación manual de FFmpeg  
 ✅ Totalmente en español  
 ✅ Control completo de descargas (detener, limpiar cola)  
@@ -52,8 +54,14 @@ python downloader.py
 3. **Controles disponibles:**
    - **➕ Añadir**: Añade la URL actual a la cola
    - **🗑️ Limpiar Cola**: Vacía la cola de descargas pendientes
+   - **📂 Abrir Carpeta**: Abre la carpeta de descargas en el explorador de Windows
    - **⏸️ Detener**: Detiene la descarga actual y cancela las pendientes
    - **❌ Salir**: Cierra la aplicación (pregunta si hay descargas pendientes)
+
+4. **Historial de descargas:**
+   - La aplicación muestra automáticamente todos los archivos descargados
+   - Cada archivo incluye su nombre completo y fecha/hora de descarga
+   - Los archivos más recientes aparecen primero en la lista
 
 ## Crear Acceso Directo y Anclar a la Barra de Tareas
 

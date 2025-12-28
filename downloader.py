@@ -28,7 +28,7 @@ class YouTubeDownloader:
                 self.root.iconphoto(False, icon)
         except Exception as e:
             print(f"Error al cargar icono: {e}")
-        self.root.geometry("700x600")
+        self.root.geometry("700x750")
         self.root.resizable(False, False)
         
         # Configurar colores y estilo
@@ -40,6 +40,7 @@ class YouTubeDownloader:
         self.download_queue = Queue()
         self.queue_list = []
         self.processing_queue = False
+        self.downloaded_files = []  # Lista de archivos descargados
         
         # Contenedor principal con padding
         main_frame = tk.Frame(root, bg="#f0f0f0")
@@ -115,9 +116,35 @@ class YouTubeDownloader:
             relief="flat",
             state="disabled",
             wrap="word",
-            height=10
+            height=8
         )
         self.queue_text.pack(fill="both", expand=True, padx=2, pady=2)
+        
+        # Etiqueta de archivos descargados
+        downloaded_label = tk.Label(
+            main_frame,
+            text="Archivos descargados:",
+            font=("Segoe UI", 12, "bold"),
+            bg="#f0f0f0",
+            fg="#333333"
+        )
+        downloaded_label.pack(anchor="w", pady=(10, 5))
+        
+        # Lista de archivos descargados con scroll
+        downloaded_frame = tk.Frame(main_frame, bg="#e8f5e9", relief="solid", borderwidth=1)
+        downloaded_frame.pack(fill="both", expand=True, pady=(0, 15))
+        
+        self.downloaded_text = scrolledtext.ScrolledText(
+            downloaded_frame,
+            font=("Consolas", 9),
+            bg="#e8f5e9",
+            fg="#2e7d32",
+            relief="flat",
+            state="disabled",
+            wrap="word",
+            height=6
+        )
+        self.downloaded_text.pack(fill="both", expand=True, padx=2, pady=2)
         
         # Contenedor para botones de control
         button_frame = tk.Frame(main_frame, bg="#f0f0f0")
@@ -137,6 +164,21 @@ class YouTubeDownloader:
             command=self.clear_queue
         )
         self.clear_button.pack(side="left", padx=5, ipady=8, ipadx=15)
+        
+        # Botón de abrir carpeta de descargas
+        open_folder_button = tk.Button(
+            button_frame,
+            text="📂 Abrir Carpeta",
+            font=("Segoe UI", 11, "bold"),
+            bg="#4CAF50",
+            fg="white",
+            activebackground="#388E3C",
+            activeforeground="white",
+            cursor="hand2",
+            relief="flat",
+            command=self.open_downloads_folder
+        )
+        open_folder_button.pack(side="left", padx=5, ipady=8, ipadx=15)
         
         # Botón de detener descarga
         self.stop_button = tk.Button(
@@ -181,6 +223,9 @@ class YouTubeDownloader:
         
         # Obtener ruta de FFmpeg
         self.ffmpeg_path = ffmpeg.get_ffmpeg_exe()
+        
+        # Inicializar visualización de archivos descargados
+        self.update_downloaded_display()
         
     def get_downloads_folder(self):
         """Obtiene la carpeta de música personalizada del usuario"""
@@ -235,6 +280,32 @@ class YouTubeDownloader:
         
         self.queue_text.config(state="disabled")
         self.queue_text.see(1.0)  # Scroll al inicio
+    
+    def update_downloaded_display(self):
+        """Actualiza la visualización de archivos descargados"""
+        self.downloaded_text.config(state="normal")
+        self.downloaded_text.delete(1.0, tk.END)
+        
+        if not self.downloaded_files:
+            self.downloaded_text.insert(tk.END, "No hay archivos descargados aún.\n\n")
+            self.downloaded_text.insert(tk.END, "Los archivos descargados aparecerán aquí.")
+        else:
+            for i, file_info in enumerate(reversed(self.downloaded_files), 1):
+                # Mostrar los más recientes primero
+                self.downloaded_text.insert(tk.END, f"✅ {file_info['title'][:60]}\n")
+                self.downloaded_text.insert(tk.END, f"   📅 {file_info['timestamp']}\n\n")
+        
+        self.downloaded_text.config(state="disabled")
+        self.downloaded_text.see(1.0)  # Scroll al inicio
+    
+    def open_downloads_folder(self):
+        """Abre la carpeta de descargas en el explorador de Windows"""
+        import subprocess
+        downloads_path = self.get_downloads_folder()
+        try:
+            subprocess.Popen(f'explorer "{downloads_path}"')
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo abrir la carpeta: {str(e)}")
     
     def clear_queue(self):
         """Limpia la cola de descargas"""
@@ -311,8 +382,11 @@ class YouTubeDownloader:
                 'postprocessors': [{
                     'key': 'FFmpegExtractAudio',
                     'preferredcodec': 'mp3',
-                    'preferredquality': '192',
+                    'preferredquality': '320',
                 }],
+                'postprocessor_args': [
+                    '-ar', '44100'  # Sample rate de 44100 Hz
+                ],
                 'outtmpl': os.path.join(downloads_path, '%(title)s.%(ext)s'),
                 'ffmpeg_location': self.ffmpeg_path,
                 'quiet': False,
@@ -336,7 +410,16 @@ class YouTubeDownloader:
                 
                 video_title = info.get('title', 'video')
             
-            # Éxito
+            # Éxito - Agregar a lista de descargados
+            from datetime import datetime
+            download_info = {
+                'title': video_title,
+                'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                'url': url
+            }
+            self.downloaded_files.append(download_info)
+            self.update_downloaded_display()
+            
             remaining = len(self.queue_list) - 1
             if remaining > 0:
                 self.update_status(f"✅ '{video_title[:30]}...' completado | {remaining} restantes", "#4CAF50")
